@@ -1,5 +1,5 @@
-import { getISOWeek } from '../utils/date';
 import { roundUp } from '../utils/roundUp';
+import { getISOWeek } from '../utils/date';
 import { getCashOutNaturalConfig } from '../config/apiConfig';
 import {
   IConfig,
@@ -15,14 +15,14 @@ export class CashOutNaturalService implements ICashOutNaturalService {
     this.config = await getCashOutNaturalConfig();
   }
 
-  private initializeWeeklyCashOut(user_id: number, week: number) {
-    this.weeklyCashOuts[user_id] = { week, total: 0 };
+  private initializeWeeklyCashOut(userId: number, week: number) {
+    this.weeklyCashOuts[userId] = { week, total: 0 };
   }
 
-  private resetWeeklyCashOutIfNewWeek(user_id: number, week: number) {
-    if (this.weeklyCashOuts[user_id].week !== week) {
-      this.weeklyCashOuts[user_id].week = week;
-      this.weeklyCashOuts[user_id].total = 0;
+  private resetWeeklyCashOutIfNewWeek(userId: number, week: number) {
+    if (this.weeklyCashOuts[userId].week !== week) {
+      this.weeklyCashOuts[userId].week = week;
+      this.weeklyCashOuts[userId].total = 0;
     }
   }
 
@@ -40,29 +40,28 @@ export class CashOutNaturalService implements ICashOutNaturalService {
     }
   }
 
-  private ensureWeeklyCashOutInitialized(user_id: number, week: number) {
-    if (!this.weeklyCashOuts[user_id]) {
-      this.initializeWeeklyCashOut(user_id, week);
+  private ensureWeeklyCashOutInitialized(userId: number, week: number) {
+    if (!this.weeklyCashOuts[userId]) {
+      this.initializeWeeklyCashOut(userId, week);
     }
-
-    this.resetWeeklyCashOutIfNewWeek(user_id, week);
+    this.resetWeeklyCashOutIfNewWeek(userId, week);
   }
 
   async calculateFee(
     date: string,
     amount: number,
-    user_id: number
+    userId: number
   ): Promise<number> {
-    const week = getISOWeek(date);
     await this.ensureConfigInitialized();
-    this.ensureWeeklyCashOutInitialized(user_id, week);
+    const week = getISOWeek(date);
+    this.ensureWeeklyCashOutInitialized(userId, week);
 
     const freeAmountLimit = this.config.week_limit.amount;
-    const totalWeeklyCashOutByUserId = this.weeklyCashOuts[user_id].total;
+    const totalWeeklyCashOutByUserId = this.weeklyCashOuts[userId].total;
 
     if (totalWeeklyCashOutByUserId < freeAmountLimit) {
       const freeAmountRemaining = freeAmountLimit - totalWeeklyCashOutByUserId;
-      this.weeklyCashOuts[user_id].total += amount;
+      this.weeklyCashOuts[userId].total += amount;
       const fee = this.calculateFeeForAmountExceedingFreeLimit(
         amount,
         freeAmountRemaining
