@@ -24,6 +24,14 @@ This project calculates commission fees for cash in and cash out operations base
    npm start
    ```
 
+## How to Run input example
+
+Run command with the path to the input file:
+
+```
+npm run runExample assets/input.json
+```
+
 ## How to Test
 
 Run the tests:

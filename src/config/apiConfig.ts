@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { config } from 'dotenv';
+
+config();
 
 const API_URL = process.env.API_URL;
 
